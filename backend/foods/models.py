@@ -18,7 +18,7 @@ class Tag(models.Model):
                              unique=True,
                              verbose_name='название тега')
     color = ColorField(default='#FF0000')
-    slug = models.SlugField(verbose_name='тег', unique=True)
+    slug = models.SlugField(verbose_name='Слаг', unique=True)
 
     class Meta:
         ordering = ['-id']
