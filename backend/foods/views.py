@@ -2,8 +2,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
-from .models import Ingredient, Tag
-from .serializers import IngredientSerializer, TagSerializer
+from api.serializers import IngredientSerializer, TagSerializer
+
+from foods.models import Ingredient, Tag
 
 
 class TagViewSet(ReadOnlyModelViewSet):
