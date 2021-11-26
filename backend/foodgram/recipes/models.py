@@ -46,9 +46,10 @@ class Recipe(models.Model):
     """
     # author = 
     # image = 
-    tags = models.ManyToManyField(Tag, verbose_name='тег')
+    
     name = models.CharField(max_length=256, verbose_name='название рецепта')
     text = models.TextField(verbose_name='описание рецепта')
+    tags = models.ManyToManyField(Tag, verbose_name='тег')
     cooking_time = models.PositiveSmallIntegerField(
         help_text='время приготовления в минутах',
         verbose_name='время приготовления',
