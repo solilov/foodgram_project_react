@@ -5,12 +5,14 @@ from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
+from recipes.models import Tag
+
 
 User = get_user_model()
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
-    """Сериализатор модели User POST запрос."""
+    """Сериализатор модели User, для создания пользователя."""
     email = serializers.EmailField(
         validators=[UniqueValidator(queryset=User.objects.all())])
     username = serializers.CharField(
@@ -31,10 +33,22 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
 
 class CustomUserSerializer(UserSerializer):
-    """Сериализатор модели User GET запрос."""
+    """
+    Сериализатор модели User для отображения профиля пользователя,
+    списка пользователей.
+    """
     # is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = ('email', 'id',  'username', 'first_name', 'last_name',
                   )
+
+
+class TagSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор модели Tag.
+    """
+    class Meta:
+        model = Tag
+        fields = ['id', 'name', 'color', 'slug']
