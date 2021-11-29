@@ -5,7 +5,7 @@ from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-from recipes.models import Ingredient ,Tag
+from recipes.models import Ingredient, IngredientRecipe, Recipe ,Tag
 
 
 User = get_user_model()
@@ -61,3 +61,33 @@ class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
         fields = ['id', 'name', 'measurement_unit']
+
+
+class IngredientRecipeSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор модели IngredientRecipe.
+    Для отображения конкретных данных по ингредиенту.
+    """
+    name = serializers.ReadOnlyField(source='ingredient.name')
+    measurement_unit = serializers.ReadOnlyField(
+        source='ingredient.measurement_unit'
+    )
+    id = serializers.ReadOnlyField(source='ingredient.id')
+
+    class Meta:
+        model = IngredientRecipe
+        fields = ('id', 'name', 'measurement_unit', 'amount')
+
+
+class RecipeSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор модели Рецепт.
+    """
+    tags = TagSerializer(many=True, read_only=True)
+    ingredients = IngredientRecipeSerializer(many=True,
+                                             read_only=True,
+                                             source='ingredient_recipe')
+
+    class Meta:
+        model = Recipe
+        fields = ['id', 'name', 'text', 'tags', 'cooking_time', 'ingredients']

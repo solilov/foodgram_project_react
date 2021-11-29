@@ -55,7 +55,8 @@ class Recipe(models.Model):
         verbose_name='время приготовления',
         validators=[MinValueValidator(1)]
     )
-    ingredient = models.ManyToManyField(Ingredient, through='IngredientRecipe')
+    ingredients = models.ManyToManyField(Ingredient,
+                                         through='IngredientRecipe')
 
     class Meta:
         ordering = ['-id']

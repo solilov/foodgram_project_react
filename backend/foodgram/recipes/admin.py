@@ -8,7 +8,7 @@ class IngredientAdmin(admin.ModelAdmin):
 
 
 class IngredientRecipeInline(admin.TabularInline):
-    model = Recipe.ingredient.through
+    model = Recipe.ingredients.through
     extra = 1
 
 
