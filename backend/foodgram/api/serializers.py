@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 
 from djoser.serializers import UserCreateSerializer, UserSerializer
@@ -68,8 +69,8 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
     Сериализатор модели IngredientRecipe.
     Для отображения конкретных данных по ингредиенту.
     """
-    name = serializers.ReadOnlyField(source='ingredient.name')
-    measurement_unit = serializers.ReadOnlyField(
+    name = serializers.StringRelatedField(source='ingredient.name')
+    measurement_unit = serializers.StringRelatedField(
         source='ingredient.measurement_unit'
     )
     id = serializers.ReadOnlyField(source='ingredient.id')
@@ -87,7 +88,56 @@ class RecipeSerializer(serializers.ModelSerializer):
     ingredients = IngredientRecipeSerializer(many=True,
                                              read_only=True,
                                              source='ingredient_recipe')
+    author = CustomUserSerializer(read_only=True)
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
-        fields = ['id', 'name', 'text', 'tags', 'cooking_time', 'ingredients']
+        fields = [
+            'id',
+            'tags',
+            'author',
+            'ingredients',
+            'is_favorited',
+            'is_in_shopping_cart',
+            'name',
+            # 'image'
+            'text',
+            'cooking_time'
+        ]
+
+    def get_is_favorited(self, obj):
+        # написать функцию для получения статуса добавления в избраннное
+        pass
+
+    def get_is_in_shopping_cart(self, obj):
+        # написать функцию статуса добавления в список покупок
+        pass
+
+    def validate(self, data):
+        tags = self.initial_data.get("tags")
+        if not tags:
+            raise serializers.ValidationError("Обязательно нужно выбрать тег")
+        data["tags"] = tags
+
+        ingredients = self.initial_data.get("ingredients")
+        if not ingredients or len(ingredients) < 1:
+            raise serializers.ValidationError(
+                "Поле ингредиент не может быть пустым"
+            )
+        data["ingredients"] = ingredients
+        return data
+
+    def create(self, validated_data):
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('ingredients')
+        recipe = Recipe.objects.create(**validated_data)
+        for ingredient in ingredients:
+            IngredientRecipe.objects.create(
+                recipe=recipe,
+                ingredient_id=ingredient.get("id"),
+                amount=ingredient.get("amount"),
+            )
+        recipe.tags.set(tags)
+        return recipe

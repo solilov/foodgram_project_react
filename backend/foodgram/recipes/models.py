@@ -1,8 +1,13 @@
 from colorfield.fields import ColorField
 
+from django.contrib.auth import get_user_model
+
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models.deletion import CASCADE
+
+
+User = get_user_model()
 
 
 class Ingredient(models.Model):
@@ -44,9 +49,11 @@ class Recipe(models.Model):
     """
     Модель рецепта.
     """
-    # author = 
     # image = 
-    
+    author = models.ForeignKey(User,
+                               on_delete=models.CASCADE,
+                               related_name='recipes',
+                               verbose_name='автор рецепта')
     name = models.CharField(max_length=256, verbose_name='название рецепта')
     text = models.TextField(verbose_name='описание рецепта')
     tags = models.ManyToManyField(Tag, verbose_name='тег')
