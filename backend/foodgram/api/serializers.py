@@ -1,4 +1,3 @@
-from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 
 from djoser.serializers import UserCreateSerializer, UserSerializer
@@ -6,14 +5,16 @@ from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-from recipes.models import Ingredient, IngredientRecipe, Recipe ,Tag
+from recipes.models import Ingredient, IngredientRecipe, Recipe , Tag
 
 
 User = get_user_model()
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
-    """Сериализатор модели User, для создания пользователя."""
+    """
+    Сериализатор модели User, для создания пользователя.
+    """
     email = serializers.EmailField(
         validators=[UniqueValidator(queryset=User.objects.all())])
     username = serializers.CharField(
@@ -141,3 +142,16 @@ class RecipeSerializer(serializers.ModelSerializer):
             )
         recipe.tags.set(tags)
         return recipe
+
+    def update(self, instance, validated_data):
+        ingredients = validated_data.pop("ingredients")
+        tags = validated_data.pop("tags")
+        instance.ingredients.clear()
+        for ingredient in ingredients:
+            IngredientRecipe.objects.create(
+                recipe=instance,
+                ingredient_id=ingredient.get("id"),
+                amount=ingredient.get("amount"),
+            )
+        instance.tags.set(tags)
+        return super().update(instance, validated_data)

@@ -54,7 +54,9 @@ class Recipe(models.Model):
                                on_delete=models.CASCADE,
                                related_name='recipes',
                                verbose_name='автор рецепта')
-    name = models.CharField(max_length=256, verbose_name='название рецепта')
+    name = models.CharField(max_length=256,
+                            unique=True,
+                            verbose_name='название рецепта')
     text = models.TextField(verbose_name='описание рецепта')
     tags = models.ManyToManyField(Tag, verbose_name='тег')
     cooking_time = models.PositiveSmallIntegerField(
