@@ -1,33 +1,31 @@
-# from django.conf import settings
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils.translation import gettext_lazy as _
+
+User = get_user_model()
 
 
-class User(AbstractUser):
-    email = models.EmailField(
-        unique=True,
-        blank=False,
-        null=False,
-        verbose_name=_('email address')
-    )
-    first_name = models.CharField(
-        max_length=150,
-        blank=False,
-        null=False,
-        verbose_name=_('first name')
-    )
-    last_name = models.CharField(
-        max_length=150,
-        blank=False,
-        null=False,
-        verbose_name=_('last name'),
-    )
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+class Follow(models.Model):
+    """
+    Модель подписки.
+    """
+    user = models.ForeignKey(User,
+                             on_delete=models.CASCADE,
+                             related_name="follower",
+                             verbose_name='подписчик')
+    following = models.ForeignKey(User,
+                                  on_delete=models.CASCADE,
+                                  related_name="following",
+                                  verbose_name='автор')
 
     class Meta:
-        ordering = ['username']
+        ordering = ['-id']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'following'], name='unique_follow'
+            )
+        ]
 
-    def __str__(self):
-        return self.get_full_name()
+    def clean(self):
+        if self.following == self.user:
+            raise ValidationError('Нельзя подписаться на себя')

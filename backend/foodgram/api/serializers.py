@@ -3,9 +3,10 @@ from django.contrib.auth import get_user_model
 from djoser.serializers import UserCreateSerializer, UserSerializer
 
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
+from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 
 from recipes.models import Ingredient, IngredientRecipe, Recipe , Tag
+from users.models import Follow
 
 
 User = get_user_model()
@@ -155,3 +156,47 @@ class RecipeSerializer(serializers.ModelSerializer):
             )
         instance.tags.set(tags)
         return super().update(instance, validated_data)
+
+
+class FollowSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор модели Follow.
+    """
+
+    email = serializers.EmailField(read_only=True, source='following.email')
+    id = serializers.PrimaryKeyRelatedField(
+        read_only=True,
+        source='following.id'
+    )
+    username = serializers.CharField(
+        read_only=True,
+        source='following.username'
+    )
+    first_name = serializers.CharField(
+        read_only=True,
+        source='following.first_name'
+    )
+    last_name = serializers.CharField(
+        read_only=True,
+        source='following.last_name'
+    )
+    is_subscribed = serializers.SerializerMethodField()
+    # recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.IntegerField(
+        source="following.recipes.count", read_only=True)
+
+    class Meta:
+        model = Follow
+        fields = [
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            # 'recipes',
+            'recipes_count'
+        ]
+
+    def get_is_subscribed(self, obj):
+        obj.user.follower.filter(following=obj.following).exists()
