@@ -1,11 +1,10 @@
 from django.contrib.auth import get_user_model
-
 from djoser.serializers import UserCreateSerializer, UserSerializer
 
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 
-from recipes.models import Ingredient, IngredientRecipe, Recipe , Tag
+from recipes.models import Favorite, Ingredient, IngredientRecipe, Recipe , Tag
 from users.models import Follow
 
 
@@ -109,20 +108,11 @@ class RecipeSerializer(serializers.ModelSerializer):
             'cooking_time'
         ]
 
-    def get_is_favorited(self, obj):
-        # написать функцию для получения статуса добавления в избраннное
-        pass
-
-    def get_is_in_shopping_cart(self, obj):
-        # написать функцию статуса добавления в список покупок
-        pass
-
     def validate(self, data):
         tags = self.initial_data.get("tags")
         if not tags:
             raise serializers.ValidationError("Обязательно нужно выбрать тег")
         data["tags"] = tags
-
         ingredients = self.initial_data.get("ingredients")
         if not ingredients or len(ingredients) < 1:
             raise serializers.ValidationError(
@@ -156,6 +146,22 @@ class RecipeSerializer(serializers.ModelSerializer):
             )
         instance.tags.set(tags)
         return super().update(instance, validated_data)
+
+    def get_is_favorited(self, obj):
+        user = None
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            user = request.user
+        return Recipe.objects.filter(favorites__user=user, id=obj.id).exists()
+
+    def get_is_in_shopping_cart(self, obj):
+        user = None
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            user = request.user
+        return Recipe.objects.filter(
+            shopping_cart__user=user, id=obj.id
+        ).exists()
 
 
 class FollowSerializer(serializers.ModelSerializer):
@@ -200,3 +206,15 @@ class FollowSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         obj.user.follower.filter(following=obj.following).exists()
+
+
+class CustomRecipeSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор выдает только необходимые поля модели Recipe.
+    """
+    # image = Base64ImageField()
+
+    class Meta:
+        model = Recipe
+        fields = ['id', 'name', 'cooking_time']
+        read_only_fields = ['id', 'name', 'cooking_time']

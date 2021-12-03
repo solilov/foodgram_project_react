@@ -97,3 +97,60 @@ class IngredientRecipe(models.Model):
 
     class Meta:
         ordering = ['-id']
+
+    def __str__(self):
+        return f'Ингредиенты для рецепта {self.recipe}'
+
+
+class Favorite(models.Model):
+    """
+    Модель для избранных рецептов.
+    """
+    user = models.ForeignKey(
+        User,
+        on_delete=CASCADE,
+        related_name='favorites'
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=CASCADE,
+        related_name='favorites',
+        verbose_name='рецепт'
+    )
+
+    class Meta:
+        ordering = ['-id']
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'recipe'],
+                                    name='unique_favorite')
+        ]
+
+    def __str__(self):
+        return self.recipe.name
+
+
+class Shopping_Cart(models.Model):
+    """
+    Модель корзины покупок.
+    """
+    user = models.ForeignKey(
+        User,
+        on_delete=CASCADE,
+        related_name='shopping_cart'
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=CASCADE,
+        related_name='shopping_cart',
+        verbose_name='рецепт'
+    )
+
+    class Meta:
+        ordering = ['-id']
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'recipe'],
+                                    name='unique_shopping_cart')
+        ]
+
+    def __str__(self):
+        return self.recipe
