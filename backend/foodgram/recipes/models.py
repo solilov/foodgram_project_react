@@ -49,11 +49,12 @@ class Recipe(models.Model):
     """
     Модель рецепта.
     """
-    # image = 
     author = models.ForeignKey(User,
                                on_delete=models.CASCADE,
                                related_name='recipes',
                                verbose_name='автор рецепта')
+    image = models.ImageField(upload_to='recipes/images',
+                              verbose_name='картинка')
     name = models.CharField(max_length=256,
                             unique=True,
                             verbose_name='название рецепта')
@@ -153,4 +154,4 @@ class Shopping_Cart(models.Model):
         ]
 
     def __str__(self):
-        return self.recipe
+        return self.recipe.name

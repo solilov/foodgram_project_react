@@ -1,10 +1,13 @@
 from django.contrib.auth import get_user_model
+
 from djoser.serializers import UserCreateSerializer, UserSerializer
 
-from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
+from drf_extra_fields.fields import Base64ImageField
 
-from recipes.models import Favorite, Ingredient, IngredientRecipe, Recipe , Tag
+from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
+
+from recipes.models import Ingredient, IngredientRecipe, Recipe , Tag
 from users.models import Follow
 
 
@@ -92,6 +95,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     author = CustomUserSerializer(read_only=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
+    image = Base64ImageField()
 
     class Meta:
         model = Recipe
@@ -103,22 +107,22 @@ class RecipeSerializer(serializers.ModelSerializer):
             'is_favorited',
             'is_in_shopping_cart',
             'name',
-            # 'image'
+            'image',
             'text',
             'cooking_time'
         ]
 
     def validate(self, data):
-        tags = self.initial_data.get("tags")
+        tags = self.initial_data.get('tags')
         if not tags:
-            raise serializers.ValidationError("Обязательно нужно выбрать тег")
-        data["tags"] = tags
-        ingredients = self.initial_data.get("ingredients")
+            raise serializers.ValidationError('Обязательно нужно выбрать тег')
+        data['tags'] = tags
+        ingredients = self.initial_data.get('ingredients')
         if not ingredients or len(ingredients) < 1:
             raise serializers.ValidationError(
-                "Поле ингредиент не может быть пустым"
+                'Поле ингредиент не может быть пустым'
             )
-        data["ingredients"] = ingredients
+        data['ingredients'] = ingredients
         return data
 
     def create(self, validated_data):
@@ -128,36 +132,36 @@ class RecipeSerializer(serializers.ModelSerializer):
         for ingredient in ingredients:
             IngredientRecipe.objects.create(
                 recipe=recipe,
-                ingredient_id=ingredient.get("id"),
-                amount=ingredient.get("amount"),
+                ingredient_id=ingredient.get('id'),
+                amount=ingredient.get('amount'),
             )
         recipe.tags.set(tags)
         return recipe
 
     def update(self, instance, validated_data):
-        ingredients = validated_data.pop("ingredients")
-        tags = validated_data.pop("tags")
+        ingredients = validated_data.pop('ingredients')
+        tags = validated_data.pop('tags')
         instance.ingredients.clear()
         for ingredient in ingredients:
             IngredientRecipe.objects.create(
                 recipe=instance,
-                ingredient_id=ingredient.get("id"),
-                amount=ingredient.get("amount"),
+                ingredient_id=ingredient.get('id'),
+                amount=ingredient.get('amount'),
             )
         instance.tags.set(tags)
         return super().update(instance, validated_data)
 
     def get_is_favorited(self, obj):
         user = None
-        request = self.context.get("request")
-        if request and hasattr(request, "user"):
+        request = self.context.get('request')
+        if request and hasattr(request, 'user'):
             user = request.user
         return Recipe.objects.filter(favorites__user=user, id=obj.id).exists()
 
     def get_is_in_shopping_cart(self, obj):
         user = None
-        request = self.context.get("request")
-        if request and hasattr(request, "user"):
+        request = self.context.get('request')
+        if request and hasattr(request, 'user'):
             user = request.user
         return Recipe.objects.filter(
             shopping_cart__user=user, id=obj.id
@@ -212,9 +216,9 @@ class CustomRecipeSerializer(serializers.ModelSerializer):
     """
     Сериализатор выдает только необходимые поля модели Recipe.
     """
-    # image = Base64ImageField()
+    image = Base64ImageField()
 
     class Meta:
         model = Recipe
-        fields = ['id', 'name', 'cooking_time']
-        read_only_fields = ['id', 'name', 'cooking_time']
+        fields = ['id', 'name', 'image', 'cooking_time']
+        read_only_fields = ['id', 'name', 'image', 'cooking_time']
