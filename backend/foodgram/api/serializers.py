@@ -204,7 +204,7 @@ class FollowSerializer(serializers.ModelSerializer):
         source='following.last_name'
     )
     is_subscribed = serializers.SerializerMethodField()
-    # recipes = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
     recipes_count = serializers.IntegerField(
         source="following.recipes.count", read_only=True)
 
@@ -217,12 +217,17 @@ class FollowSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'is_subscribed',
-            # 'recipes',
+            'recipes',
             'recipes_count'
         ]
 
     def get_is_subscribed(self, obj):
         obj.user.follower.filter(following=obj.following).exists()
+
+    def get_recipes(self, obj):
+        recipes = obj.following.recipes.all()
+        serializer = CustomRecipeSerializer(recipes, many=True)
+        return serializer.data
 
 
 class CustomRecipeSerializer(serializers.ModelSerializer):

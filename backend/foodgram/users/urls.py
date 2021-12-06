@@ -1,5 +1,6 @@
 from django.urls import include, path
 from djoser import views
+
 from rest_framework.routers import DefaultRouter
 
 from users.views import FollowViewSet
@@ -7,7 +8,7 @@ from users.views import FollowViewSet
 
 router = DefaultRouter()
 
-router.register('users/subscriptions', FollowViewSet, basename='follow')
+router.register('users', FollowViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

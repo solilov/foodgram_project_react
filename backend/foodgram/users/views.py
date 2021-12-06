@@ -1,12 +1,11 @@
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
-
-from rest_framework import status, viewsets
-from rest_framework import permissions
+from djoser import views
+from rest_framework import response, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 
+from api.pagination import FollowPagination
 from api.serializers import FollowSerializer
 from users.models import Follow
 
@@ -14,10 +13,35 @@ from users.models import Follow
 User = get_user_model()
 
 
-class FollowViewSet(viewsets.ModelViewSet):
-    serializer_class = FollowSerializer
-    permission_classes = [IsAuthenticated]
+class FollowViewSet(views.UserViewSet):
+    pagination_class = FollowPagination
 
-    def get_queryset(self):
-        user = self.request.user
-        return Follow.objects.filter(user=user)
+    @action(detail=False, permission_classes=[IsAuthenticated])
+    def subscriptions(self, request):
+        user = request.user
+        following = Follow.objects.filter(user=user)
+        pages = self.paginate_queryset(following)
+        serializer = FollowSerializer(pages, many=True)
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=True, methods=['get', 'delete'],
+            permission_classes=[IsAuthenticated])
+    def subscribe(self, request, id):
+        user = request.user
+        following = get_object_or_404(User, id=id)
+        if user == following:
+            return response.Response('Нельзя подписаться на себя',
+                                     status=status.HTTP_400_BAD_REQUEST)
+        elif Follow.objects.filter(user=user, following=following).exists():
+            return response.Response('Вы уже подписаны на этого автора',
+                                     status=status.HTTP_400_BAD_REQUEST)
+
+        if request.method == 'DELETE':
+            Follow.objects.filter(user=user, following=following).delete()
+            return response.Response(status=status.HTTP_204_NO_CONTENT)
+        obj = Follow.objects.create(user=user, following=following)
+        serializer = FollowSerializer(obj)
+        return response.Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )

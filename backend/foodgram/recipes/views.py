@@ -67,3 +67,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             recipe_id=pk
         ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # @action(detail=True, methods=['get'])
+    # def download_shopping_cart(self):
+    #     pass
