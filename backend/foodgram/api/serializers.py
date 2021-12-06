@@ -42,12 +42,21 @@ class CustomUserSerializer(UserSerializer):
     Сериализатор модели User для отображения профиля пользователя,
     списка пользователей.
     """
-    # is_subscribed = serializers.SerializerMethodField()
+    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = ('email', 'id',  'username', 'first_name', 'last_name',
-                  )
+                  'is_subscribed')
+
+    def get_is_subscribed(self, following):
+        user = self.context.get('request').user
+        if user.is_authenticated:
+            return Follow.objects.filter(
+                user=user,
+                following=following.id
+            ).exists()
+        return False
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -156,6 +165,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if request and hasattr(request, 'user'):
             user = request.user
+            if user.is_anonymous:
+                return False
         return Recipe.objects.filter(favorites__user=user, id=obj.id).exists()
 
     def get_is_in_shopping_cart(self, obj):
@@ -163,6 +174,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if request and hasattr(request, 'user'):
             user = request.user
+            if user.is_anonymous:
+                return False
         return Recipe.objects.filter(
             shopping_cart__user=user, id=obj.id
         ).exists()
