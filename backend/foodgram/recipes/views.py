@@ -1,6 +1,13 @@
+from django.db.models import Sum
+from django.http import HttpResponse
+
 from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
+from reportlab.pdfgen import canvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
 from rest_framework.decorators import action
 
 from rest_framework import generics, status, viewsets
@@ -13,7 +20,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 from api.pagination import RecipePagination
 from api.serializers import CustomRecipeSerializer, IngredientSerializer, RecipeSerializer, TagSerializer
 
-from recipes.models import Favorite, Ingredient, Recipe, Shopping_Cart, Tag
+from recipes.models import Favorite, Ingredient, IngredientRecipe, Recipe, Shopping_Cart, Tag
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -68,6 +75,33 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    # @action(detail=True, methods=['get'])
-    # def download_shopping_cart(self):
-    #     pass
+    @action(detail=False, methods=['get'])
+    def download_shopping_cart(self, request):
+        user = request.user
+        shopping_list = IngredientRecipe.objects.filter(
+            recipe__shopping_cart__user=user
+        ).values(
+            'ingredient__name', 'ingredient__measurement_unit'
+        ).annotate(amount=Sum('amount')).order_by()
+
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = (
+            'attachment; filename="shopping_list.pdf"'
+        )
+        pdfmetrics.registerFont(TTFont('Petersburg', 'PetersburgITT.ttf'))
+        p = canvas.Canvas(response)
+        p.setFont('Petersburg', 24)
+        p.drawString(200, 800, 'Список покупок')
+        p.setFont('Petersburg', 20)
+        number = 1
+        height = 750
+        for i in shopping_list:
+            p.drawString(100, height, text=(
+                f'{number}) {i["ingredient__name"]} - {i["amount"]}'
+                f'{i["ingredient__measurement_unit"]}'
+            ))
+            height -= 20
+            number += 1
+        p.showPage()
+        p.save()
+        return response
