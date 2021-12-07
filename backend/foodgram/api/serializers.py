@@ -15,7 +15,7 @@ from users.models import Follow
 User = get_user_model()
 
 
-class CustomUserCreateSerializer(UserCreateSerializer):
+class CreateUserSerializer(UserCreateSerializer):
     """
     Сериализатор модели User, для создания пользователя.
     """
