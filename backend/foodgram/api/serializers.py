@@ -7,7 +7,8 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-from recipes.models import Ingredient, IngredientRecipe, Recipe , Tag
+from recipes.models import Ingredient, IngredientRecipe, Recipe, Tag
+
 from users.models import Follow
 
 

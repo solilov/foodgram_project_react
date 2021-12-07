@@ -1,12 +1,14 @@
 from django.contrib.auth import get_user_model
+
 from djoser import views
-from rest_framework import response, status, viewsets
+from rest_framework import response, status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 
 from api.pagination import FollowPagination
 from api.serializers import FollowSerializer
+
 from users.models import Follow
 
 
