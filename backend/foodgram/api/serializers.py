@@ -1,16 +1,11 @@
 from django.contrib.auth import get_user_model
-
 from djoser.serializers import UserCreateSerializer, UserSerializer
-
 from drf_extra_fields.fields import Base64ImageField
-
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from recipes.models import Ingredient, IngredientRecipe, Recipe, Tag
-
 from users.models import Follow
-
 
 User = get_user_model()
 
@@ -57,7 +52,6 @@ class CustomUserSerializer(UserSerializer):
                 user=user,
                 following=following.id
             ).exists()
-        return False
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -135,16 +129,19 @@ class RecipeSerializer(serializers.ModelSerializer):
         data['ingredients'] = ingredients
         return data
 
-    def create(self, validated_data):
-        tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('ingredients')
-        recipe = Recipe.objects.create(**validated_data)
+    def add_ingredients_recipe(self, recipe, ingredients):
         for ingredient in ingredients:
             IngredientRecipe.objects.create(
                 recipe=recipe,
                 ingredient_id=ingredient.get('id'),
                 amount=ingredient.get('amount'),
             )
+
+    def create(self, validated_data):
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('ingredients')
+        recipe = Recipe.objects.create(**validated_data)
+        self.add_ingredients_recipe(recipe, ingredients)
         recipe.tags.set(tags)
         return recipe
 
@@ -152,31 +149,20 @@ class RecipeSerializer(serializers.ModelSerializer):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         instance.ingredients.clear()
-        for ingredient in ingredients:
-            IngredientRecipe.objects.create(
-                recipe=instance,
-                ingredient_id=ingredient.get('id'),
-                amount=ingredient.get('amount'),
-            )
+        self.add_ingredients_recipe(instance, ingredients)
         instance.tags.set(tags)
         return super().update(instance, validated_data)
 
     def get_is_favorited(self, obj):
-        user = None
-        request = self.context.get('request')
-        if request and hasattr(request, 'user'):
-            user = request.user
-            if user.is_anonymous:
-                return False
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
         return Recipe.objects.filter(favorites__user=user, id=obj.id).exists()
 
     def get_is_in_shopping_cart(self, obj):
-        user = None
-        request = self.context.get('request')
-        if request and hasattr(request, 'user'):
-            user = request.user
-            if user.is_anonymous:
-                return False
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
         return Recipe.objects.filter(
             shopping_cart__user=user, id=obj.id
         ).exists()
@@ -223,7 +209,7 @@ class FollowSerializer(serializers.ModelSerializer):
         ]
 
     def get_is_subscribed(self, obj):
-        obj.user.follower.filter(following=obj.following).exists()
+        return obj.user.follower.filter(following=obj.following).exists()
 
     def get_recipes(self, obj):
         recipes = obj.following.recipes.all()

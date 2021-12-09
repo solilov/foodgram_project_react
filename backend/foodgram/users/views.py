@@ -1,5 +1,4 @@
 from django.contrib.auth import get_user_model
-
 from djoser import views
 from rest_framework import response, status
 from rest_framework.decorators import action
@@ -8,9 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from api.pagination import FollowPagination
 from api.serializers import FollowSerializer
-
 from users.models import Follow
-
 
 User = get_user_model()
 
@@ -31,19 +28,22 @@ class FollowViewSet(views.UserViewSet):
     def subscribe(self, request, id):
         user = request.user
         following = get_object_or_404(User, id=id)
-        if user == following:
-            return response.Response('Нельзя подписаться на себя',
-                                     status=status.HTTP_400_BAD_REQUEST)
-        elif Follow.objects.filter(user=user, following=following).exists():
-            return response.Response('Вы уже подписаны на этого автора',
-                                     status=status.HTTP_400_BAD_REQUEST)
-
+        if request.method == 'GET':
+            if user == following:
+                return response.Response('Нельзя подписаться на себя',
+                                         status=status.HTTP_400_BAD_REQUEST)
+            elif Follow.objects.filter(user=user,
+                                       following=following).exists():
+                return response.Response('Вы уже подписаны на этого автора',
+                                         status=status.HTTP_400_BAD_REQUEST)
+            obj = Follow.objects.create(user=user, following=following)
+            serializer = FollowSerializer(obj, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return response.Response(
+                    serializer.data,
+                    status=status.HTTP_201_CREATED
+                )
         if request.method == 'DELETE':
             Follow.objects.filter(user=user, following=following).delete()
             return response.Response(status=status.HTTP_204_NO_CONTENT)
-        obj = Follow.objects.create(user=user, following=following)
-        serializer = FollowSerializer(obj)
-        return response.Response(
-            serializer.data,
-            status=status.HTTP_201_CREATED
-        )

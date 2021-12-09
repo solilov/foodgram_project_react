@@ -1,10 +1,8 @@
 from colorfield.fields import ColorField
-
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models.deletion import CASCADE
-
 
 User = get_user_model()
 
@@ -23,6 +21,11 @@ class Ingredient(models.Model):
         help_text='Введите единицы измерения'
     )
 
+    class Meta:
+        ordering = ['-id']
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
+
     def __str__(self):
         return f'{self.name} {self.measurement_unit}'
 
@@ -39,6 +42,8 @@ class Tag(models.Model):
 
     class Meta:
         ordering = ['-id']
+        verbose_name = 'Тег'
+        verbose_name_plural = 'Теги'
 
     def __str__(self):
         return self.name
@@ -49,7 +54,7 @@ class Recipe(models.Model):
     Модель рецепта.
     """
     author = models.ForeignKey(User,
-                               on_delete=models.CASCADE,
+                               on_delete=CASCADE,
                                related_name='recipes',
                                verbose_name='автор рецепта')
     image = models.ImageField(upload_to='recipes/images',
@@ -62,13 +67,17 @@ class Recipe(models.Model):
     cooking_time = models.PositiveSmallIntegerField(
         help_text='время приготовления в минутах',
         verbose_name='время приготовления',
-        validators=[MinValueValidator(1)]
+        validators=[MinValueValidator(
+            1, message='Минимальное время приготовления 1 минута'
+        )]
     )
     ingredients = models.ManyToManyField(Ingredient,
                                          through='IngredientRecipe')
 
     class Meta:
         ordering = ['-id']
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
 
     def __str__(self):
         return self.name
@@ -97,6 +106,8 @@ class IngredientRecipe(models.Model):
 
     class Meta:
         ordering = ['-id']
+        verbose_name = 'Ингредиент рецепта'
+        verbose_name_plural = 'Ингредиенты рецепта'
 
     def __str__(self):
         return f'Ингредиенты для рецепта {self.recipe}'
@@ -120,6 +131,8 @@ class Favorite(models.Model):
 
     class Meta:
         ordering = ['-id']
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранные'
         constraints = [
             models.UniqueConstraint(fields=['user', 'recipe'],
                                     name='unique_favorite')
@@ -147,6 +160,8 @@ class Shopping_Cart(models.Model):
 
     class Meta:
         ordering = ['-id']
+        verbose_name = 'Корзина покупок'
+        verbose_name_plural = 'Корзина покупок'
         constraints = [
             models.UniqueConstraint(fields=['user', 'recipe'],
                                     name='unique_shopping_cart')
