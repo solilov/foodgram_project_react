@@ -74,7 +74,7 @@ jobs:
             sudo docker pull alexkastorka/foodgram_frontend:v1
             sudo docker pull alexkastorka/foodgram:v1
             sudo docker-compose stop
-            sudo docker-compose rm -f foodgram --build
+            sudo docker-compose rm -f backend --build
             rm .env
             touch .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
@@ -87,9 +87,9 @@ jobs:
             # echo DEBUG=${{ secrets.DEBUG }} >> .env
             # echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env
             sudo docker-compose up -d
-            sudo docker-compose exec -T foodgram python manage.py collectstatic --noinput
-            sudo docker-compose exec -T foodgram python manage.py makemigrations --noinput
-            sudo docker-compose exec -T foodgram python manage.py migrate --noinput
+            sudo docker-compose exec -T backend python manage.py collectstatic --noinput
+            sudo docker-compose exec -T backend python manage.py makemigrations --noinput
+            sudo docker-compose exec -T backend python manage.py migrate --noinput
 
   # send_message:
   #   runs-on: ubuntu-latest
