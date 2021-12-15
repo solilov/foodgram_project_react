@@ -11,7 +11,7 @@ services:
   
   backend:
     image: alexkastorka/foodgram:v1
-    # container_name: foodgram
+    container_name: foodgram
     restart: always
     volumes:
       - static_value:/code/static/
