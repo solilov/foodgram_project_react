@@ -174,7 +174,7 @@ class FollowSerializer(serializers.ModelSerializer):
     """
 
     email = serializers.EmailField(read_only=True, source='following.email')
-    id = serializers.PrimaryKeyRelatedField(
+    id = serializers.ReadOnlyField(
         read_only=True,
         source='following.id'
     )
