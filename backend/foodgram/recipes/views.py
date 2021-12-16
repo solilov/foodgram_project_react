@@ -57,8 +57,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def shopping_cart(self, request, pk):
         if request.method == 'GET':
             recipe = get_object_or_404(Recipe, id=pk)
-            Shopping_Cart.objects.get_or_create(
-                user=self.request.user,
+            Shopping_Cart.objects.create(
+                user=request.user,
                 recipe=recipe
             )
             serializer = CustomRecipeSerializer(recipe)
