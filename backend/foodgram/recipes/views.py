@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from api.filters import FavoritedAndShopping_CartFilter
-from api.pagination import RecipePagination
+from api.pagination import CustomPagination
 from api.serializers import (CustomRecipeSerializer, IngredientSerializer,
                              RecipeSerializer, TagSerializer)
 from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
@@ -37,7 +37,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
     filter_backends = [DjangoFilterBackend]
     filter_class = FavoritedAndShopping_CartFilter
-    pagination_class = RecipePagination
+    pagination_class = CustomPagination
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
