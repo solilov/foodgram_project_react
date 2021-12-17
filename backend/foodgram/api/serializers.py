@@ -207,20 +207,20 @@ class FollowSerializer(serializers.ModelSerializer):
             'recipes_count'
         ]
 
-    # def get_is_subscribed(self, obj):
-    #     return obj.user.follower.filter(following=obj.following).exists()
     def get_is_subscribed(self, obj):
-        return Follow.objects.filter(
-            user=obj.user, following=obj.following
-        ).exists()
+        return obj.user.follower.filter(following=obj.following).exists()
+    # def get_is_subscribed(self, obj):
+    #     return Follow.objects.filter(
+    #         user=obj.user, following=obj.following
+    #     ).exists()
 
-    # def get_recipes(self, obj):
-    #     recipes = obj.following.recipes.all()
-    #     serializer = CustomRecipeSerializer(recipes, many=True)
-    #     return serializer.data
     def get_recipes(self, obj):
-        recipes = Recipe.objects.filter(author=obj.author)
-        return CustomRecipeSerializer(recipes, many=True).data
+        recipes = obj.following.recipes.all()
+        serializer = CustomRecipeSerializer(recipes, many=True)
+        return serializer.data
+    # def get_recipes(self, obj):
+    #     recipes = Recipe.objects.filter(author=obj.author)
+    #     return CustomRecipeSerializer(recipes, many=True).data
 
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj.author).count()
