@@ -173,23 +173,31 @@ class FollowSerializer(serializers.ModelSerializer):
     Сериализатор модели Follow.
     """
 
-    email = serializers.EmailField(read_only=True, source='following.email')
-    id = serializers.ReadOnlyField(
-        read_only=True,
-        source='following.id'
-    )
-    username = serializers.CharField(
-        read_only=True,
-        source='following.username'
-    )
-    first_name = serializers.CharField(
-        read_only=True,
-        source='following.first_name'
-    )
-    last_name = serializers.CharField(
-        read_only=True,
-        source='following.last_name'
-    )
+    # email = serializers.EmailField(read_only=True, source='following.email')
+    # id = serializers.ReadOnlyField(
+    #     read_only=True,
+    #     source='following.id'
+    # )
+    # username = serializers.CharField(
+    #     read_only=True,
+    #     source='following.username'
+    # )
+    # first_name = serializers.CharField(
+    #     read_only=True,
+    #     source='following.first_name'
+    # )
+    # last_name = serializers.CharField(
+    #     read_only=True,
+    #     source='following.last_name'
+    # )
+    # is_subscribed = serializers.SerializerMethodField()
+    # recipes = serializers.SerializerMethodField()
+    # recipes_count = serializers.SerializerMethodField()
+    id = serializers.ReadOnlyField(source='following.id')
+    email = serializers.ReadOnlyField(source='following.email')
+    username = serializers.ReadOnlyField(source='following.username')
+    first_name = serializers.ReadOnlyField(source='following.first_name')
+    last_name = serializers.ReadOnlyField(source='following.last_name')
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
