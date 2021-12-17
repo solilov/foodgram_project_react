@@ -39,13 +39,16 @@ class FollowViewSet(views.UserViewSet):
                 return response.Response('Вы уже подписаны на этого автора',
                                          status=status.HTTP_400_BAD_REQUEST)
             obj = Follow.objects.create(user=user, following=following)
-            serializer = FollowSerializer(obj, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return response.Response(
-                    serializer.data,
-                    status=status.HTTP_201_CREATED
-                )
+            # serializer = FollowSerializer(obj, data=request.data)
+            # if serializer.is_valid():
+            #     serializer.save()
+            #     return response.Response(
+            #         serializer.data,
+            #         status=status.HTTP_201_CREATED
+            #     )
+            serializer = FollowSerializer(obj)
+            return response.Response(serializer.data,
+                                     status=status.HTTP_201_CREATED)
         if request.method == 'DELETE':
             Follow.objects.filter(user=user, following=following).delete()
             return response.Response(status=status.HTTP_204_NO_CONTENT)
