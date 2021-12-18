@@ -22,7 +22,7 @@ class TagViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     filter_backends = IngredientFilter
-    filter_fields = ['^name',]
+    filter_fields = ['^name']
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
