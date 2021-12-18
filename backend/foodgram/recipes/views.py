@@ -33,11 +33,20 @@ class IngredientViewSet(ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    queryset = Recipe.objects.all()
+    # queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     filter_backends = [DjangoFilterBackend]
     filter_class = FavoritedAndShopping_CartFilter
     pagination_class = CustomPagination
+
+    def get_queryset(self):
+        queryset = Recipe.objects.all()
+        # user = self.request.user
+        if self.request.query_params.get('is_favorited'):
+            queryset = queryset.filter(favorites__user=self.request.user)
+        elif self.request.query_params.get('is_in_shopping_cart'):
+            queryset = queryset.filter(shopping_cart__user=self.request.user)
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
