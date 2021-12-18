@@ -29,7 +29,7 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     filter_backends = [DjangoFilterBackend]
-    filter_fields = ['^name']
+    filter_fields = ['name', 'id']
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
