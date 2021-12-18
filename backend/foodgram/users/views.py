@@ -42,8 +42,6 @@ class SubscribeView(APIView):
                                      status=status.HTTP_400_BAD_REQUEST)
         obj = Follow.objects.create(user=user, following=following)
         serializer = FollowSerializer(obj)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
         return response.Response(
             serializer.data,
             status=status.HTTP_201_CREATED
