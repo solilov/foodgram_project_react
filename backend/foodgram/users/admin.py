@@ -11,18 +11,6 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ['username', 'email']
     list_filter = ['email', 'username']
 
-    def save_model(self, request, obj, form, change):
-        """
-        Если было изменение в поле пароль, сохраняет новый хешированный пароль.
-        """
-        if obj.pk:
-            orig_obj = User.objects.get(pk=obj.pk)
-            if obj.password != orig_obj.password:
-                obj.set_password(obj.password)
-        else:
-            obj.set_password(obj.password)
-        obj.save()
-
 
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)

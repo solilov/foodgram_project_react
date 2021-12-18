@@ -16,8 +16,8 @@ class TagOrAuthorFilter(FilterSet):
 
 
 class IngredientFilter(FilterSet):
-    name = CharFilter(field_name="name", lookup_expr="startswith")
+    name = CharFilter(field_name='name', lookup_expr='startswith')
 
     class Meta:
         model = Ingredient
-        fields = ("name",)
+        fields = ('name',)
