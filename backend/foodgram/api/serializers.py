@@ -1,10 +1,9 @@
 from django.contrib.auth import get_user_model
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
+from recipes.models import Ingredient, IngredientRecipe, Recipe, Tag
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-
-from recipes.models import Ingredient, IngredientRecipe, Recipe, Tag
 from users.models import Follow
 
 User = get_user_model()
@@ -193,14 +192,6 @@ class FollowSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
-    # id = serializers.ReadOnlyField(source='following.id')
-    # email = serializers.ReadOnlyField(source='following.email')
-    # username = serializers.ReadOnlyField(source='following.username')
-    # first_name = serializers.ReadOnlyField(source='following.first_name')
-    # last_name = serializers.ReadOnlyField(source='following.last_name')
-    # is_subscribed = serializers.SerializerMethodField()
-    # recipes = serializers.SerializerMethodField()
-    # recipes_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Follow
@@ -217,18 +208,11 @@ class FollowSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         return obj.user.follower.filter(following=obj.following).exists()
-    # def get_is_subscribed(self, obj):
-    #     return Follow.objects.filter(
-    #         user=obj.user, following=obj.following
-    #     ).exists()
 
     def get_recipes(self, obj):
         recipes = obj.following.recipes.all()
         serializer = CustomRecipeSerializer(recipes, many=True)
         return serializer.data
-    # def get_recipes(self, obj):
-    #     recipes = Recipe.objects.filter(author=obj.author)
-    #     return CustomRecipeSerializer(recipes, many=True).data
 
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj.following).count()
