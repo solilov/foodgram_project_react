@@ -48,7 +48,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 sudo  docker-compose --version
 ```
 
-#### <a name="Подготовка для заупска workflow">Подготовка для заупска workflow</a>
+#### <a name="Подготовка для запуска workflow">Подготовка для заупска workflow</a>
 
 - Выполнить форк проекта в свой аккаунт github
 - Клонировать репозиторий и перейти в него в командной строке:
@@ -120,8 +120,5 @@ SECRET_KEY
 
 ### <a name="Автор">Автор</a>
 ```
-Солилов Александр
-```
-```
-https://github.com/solilov
+Солилов Александр https://github.com/solilov
 ```
