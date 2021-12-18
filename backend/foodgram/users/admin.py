@@ -6,7 +6,6 @@ from users.models import Follow
 User = get_user_model()
 
 
-@admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = ['username', 'email', 'first_name', 'last_name']
     search_fields = ['username', 'email']
@@ -25,4 +24,6 @@ class UserAdmin(admin.ModelAdmin):
         obj.save()
 
 
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
 admin.site.register(Follow)
