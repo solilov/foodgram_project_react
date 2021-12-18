@@ -21,15 +21,15 @@ from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
 class TagViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    filter_backends = IngredientFilter
-    filter_fields = ['^name']
+    filter_backends = [DjangoFilterBackend]
+    filter_fields = ['name', 'slug', 'id']
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filter_backends = [DjangoFilterBackend]
-    filter_fields = ['name', 'id']
+    filter_backends = IngredientFilter
+    filter_fields = ['^name']
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
