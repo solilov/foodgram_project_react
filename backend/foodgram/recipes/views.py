@@ -7,7 +7,9 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from api.filters import IngredientFilter, TagOrAuthorFilter
@@ -48,34 +50,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(detail=True, methods=['get', 'delete'])
-    def favorite(self, request, pk):
-        if request.method == 'GET':
-            recipe = get_object_or_404(Recipe, id=pk)
-            Favorite.objects.get_or_create(
-                user=self.request.user, recipe=recipe
-            )
-            serializer = CustomRecipeSerializer(recipe)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        Favorite.objects.filter(user=self.request.user, recipe_id=pk).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(detail=True, methods=['get', 'delete'])
-    def shopping_cart(self, request, pk):
-        if request.method == 'GET':
-            recipe = get_object_or_404(Recipe, id=pk)
-            Shopping_Cart.objects.create(
-                user=request.user,
-                recipe=recipe
-            )
-            serializer = CustomRecipeSerializer(recipe)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        Shopping_Cart.objects.filter(
-            user=self.request.user,
-            recipe_id=pk
-        ).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
     @action(detail=False, methods=['get'])
     def download_shopping_cart(self, request):
         user = request.user
@@ -106,3 +80,47 @@ class RecipeViewSet(viewsets.ModelViewSet):
         p.showPage()
         p.save()
         return response
+
+    # @action(detail=True, methods=['get', 'delete'])
+    # def favorite(self, request, pk):
+    #     if request.method == 'GET':
+    #         recipe = get_object_or_404(Recipe, id=pk)
+    #         Favorite.objects.get_or_create(
+    #             user=self.request.user, recipe=recipe
+    #         )
+    #         serializer = CustomRecipeSerializer(recipe)
+    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #     Favorite.objects.filter(user=self.request.user, recipe_id=pk).delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # @action(detail=True, methods=['get', 'delete'])
+    # def shopping_cart(self, request, pk):
+    #     if request.method == 'GET':
+    #         recipe = get_object_or_404(Recipe, id=pk)
+    #         Shopping_Cart.objects.create(
+    #             user=request.user,
+    #             recipe=recipe
+    #         )
+    #         serializer = CustomRecipeSerializer(recipe)
+    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #     Shopping_Cart.objects.filter(
+    #         user=self.request.user,
+    #         recipe_id=pk
+    #     ).delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FavoriteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        recipe = get_object_or_404(Recipe, id=pk)
+        Favorite.objects.get_or_create(
+            user=self.request.user, recipe=recipe
+        )
+        serializer = CustomRecipeSerializer(recipe)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, pk):
+        Favorite.objects.filter(user=self.request.user, recipe_id=pk).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
