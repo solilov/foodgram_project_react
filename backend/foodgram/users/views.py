@@ -55,7 +55,6 @@ class SubscribeView(APIView):
         Follow.objects.filter(user=user, following=following).delete()
         return response.Response(status=status.HTTP_204_NO_CONTENT)
 
-
     # @action(detail=True, methods=['get', 'delete'],
     #         permission_classes=[IsAuthenticated])
     # def subscribe(self, request, id):
