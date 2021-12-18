@@ -28,7 +28,7 @@ class TagViewSet(ReadOnlyModelViewSet):
 class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filter_backends = IngredientFilter
+    filter_backends = [DjangoFilterBackend]
     filter_fields = ['^name']
 
 
