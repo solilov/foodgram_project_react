@@ -10,7 +10,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
-from api.filters import TagOrAuthorFilter
+from api.filters import IngredientFilter, TagOrAuthorFilter
 from api.pagination import CustomPagination
 from api.serializers import (CustomRecipeSerializer, IngredientSerializer,
                              RecipeSerializer, TagSerializer)
@@ -29,7 +29,7 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     filter_backends = [DjangoFilterBackend]
-    filter_fields = ['name', 'id']
+    filter_class = IngredientFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
