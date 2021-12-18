@@ -90,7 +90,7 @@ class FavoriteView(APIView):
         serializer = CustomRecipeSerializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def delete(self, request, pk):
+    def delete(self, request, id):
         Favorite.objects.filter(user=self.request.user, recipe_id=id).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
