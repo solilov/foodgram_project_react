@@ -1,21 +1,22 @@
+from api.filters import IngredientFilter, TagOrAuthorFilter
+from api.pagination import CustomPagination
+from api.serializers import (CustomRecipeSerializer, IngredientSerializer,
+                             RecipeSerializer, TagSerializer)
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
+                            Shopping_Cart, Tag)
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
-
-from api.filters import IngredientFilter, TagOrAuthorFilter
-from api.pagination import CustomPagination
-from api.serializers import (CustomRecipeSerializer, IngredientSerializer,
-                             RecipeSerializer, TagSerializer)
-from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
-                            Shopping_Cart, Tag)
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -79,30 +80,33 @@ class RecipeViewSet(viewsets.ModelViewSet):
         p.save()
         return response
 
-    @action(detail=True, methods=['get', 'delete'])
-    def favorite(self, request, pk):
-        if request.method == 'GET':
-            recipe = get_object_or_404(Recipe, id=pk)
-            Favorite.objects.get_or_create(
-                user=self.request.user, recipe=recipe
-            )
-            serializer = CustomRecipeSerializer(recipe)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        Favorite.objects.filter(user=self.request.user, recipe_id=pk).delete()
+
+class FavoriteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, id):
+        recipe = get_object_or_404(Recipe, id=id)
+        Favorite.objects.get_or_create(user=request.user, recipe=recipe)
+        serializer = CustomRecipeSerializer(recipe)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, id):
+        Favorite.objects.filter(user=request.user, recipe_id=id).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=['get', 'delete'])
-    def shopping_cart(self, request, pk):
-        if request.method == 'GET':
-            recipe = get_object_or_404(Recipe, id=pk)
-            Shopping_Cart.objects.create(
-                user=request.user,
-                recipe=recipe
-            )
-            serializer = CustomRecipeSerializer(recipe)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+class Shopping_CartView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, id):
+        recipe = get_object_or_404(Recipe, id=id)
+        Shopping_Cart.objects.create(user=request.user, recipe=recipe)
+        serializer = CustomRecipeSerializer(recipe)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, id):
         Shopping_Cart.objects.filter(
-            user=self.request.user,
-            recipe_id=pk
+            user=request.user,
+            recipe_id=id
         ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
