@@ -13,10 +13,14 @@ class IngredientRecipeInline(admin.TabularInline):
 
 
 class RecipeAdmin(admin.ModelAdmin):
-    search_fields = ['name', 'author', 'tags']
     inlines = [
         IngredientRecipeInline,
     ]
+    list_display = ('author', 'name', 'favorite_count')
+    list_filter = ('author', 'name', 'tags')
+
+    def favorite_count(self, obj):
+        return Favorite.objects.filter(recipe=obj).count()
 
 
 admin.site.register(Ingredient, IngredientAdmin)
