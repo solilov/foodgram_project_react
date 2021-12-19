@@ -5,6 +5,7 @@ from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
 
 class IngredientAdmin(admin.ModelAdmin):
     search_fields = ('name',)
+    list_filter = ('name',)
 
 
 class IngredientRecipeInline(admin.TabularInline):
