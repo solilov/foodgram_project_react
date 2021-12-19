@@ -51,24 +51,3 @@ class SubscribeView(APIView):
         following = get_object_or_404(User, id=id)
         Follow.objects.filter(user=user, following=following).delete()
         return response.Response(status=status.HTTP_204_NO_CONTENT)
-
-    # @action(detail=True, methods=['get', 'delete'],
-    #         permission_classes=[IsAuthenticated])
-    # def subscribe(self, request, id):
-    #     user = request.user
-    #     following = get_object_or_404(User, id=id)
-    #     if request.method == 'GET':
-    #         if user == following:
-    #             return response.Response('Нельзя подписаться на себя',
-    #                                      status=status.HTTP_400_BAD_REQUEST)
-    #         elif Follow.objects.filter(user=user,
-    #                                    following=following).exists():
-    #             return response.Response('Вы уже подписаны на этого автора',
-    #                                      status=status.HTTP_400_BAD_REQUEST)
-    #         obj = Follow.objects.create(user=user, following=following)
-    #         serializer = FollowSerializer(obj)
-    #         return response.Response(serializer.data,
-    #                                  status=status.HTTP_201_CREATED)
-    #     if request.method == 'DELETE':
-    #         Follow.objects.filter(user=user, following=following).delete()
-    #         return response.Response(status=status.HTTP_204_NO_CONTENT)

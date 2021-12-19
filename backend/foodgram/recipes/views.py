@@ -86,12 +86,12 @@ class FavoriteView(APIView):
 
     def get(self, request, id):
         recipe = get_object_or_404(Recipe, id=id)
-        Favorite.objects.get_or_create(user=self.request.user, recipe=recipe)
+        Favorite.objects.get_or_create(user=request.user, recipe=recipe)
         serializer = CustomRecipeSerializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, id):
-        Favorite.objects.filter(user=self.request.user, recipe_id=id).delete()
+        Favorite.objects.filter(user=request.user, recipe_id=id).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -106,7 +106,7 @@ class Shopping_CartView(APIView):
 
     def delete(self, request, id):
         Shopping_Cart.objects.filter(
-            user=self.request.user,
+            user=request.user,
             recipe_id=id
         ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

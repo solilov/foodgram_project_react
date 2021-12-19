@@ -11,7 +11,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('users/<int:id>/subscribe/',
          SubscribeView.as_view(),
-         name='create_destroy_subs'
+         name='subscribe'
          ),
     path('auth/token/login/', views.TokenCreateView.as_view(), name='login'),
     path('auth/token/logout/', views.TokenDestroyView.as_view(),
