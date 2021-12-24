@@ -31,6 +31,7 @@ DEBUG = os.getenv('DEBUG')
 
 ALLOWED_HOSTS = [
     '178.154.252.235',
+    'solilov.ml',
 ]
 
 
